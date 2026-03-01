@@ -16,7 +16,7 @@
 
 1. **Fork 仓库**：
    - 访问 [GitHub 仓库](https://github.com/Dirige/EMBY_CF)
-   - 点击 "Fork"（派生）按钮创建自己的副本
+   - 点击 "Fork"按钮创建自己的副本
 
 2. **配置 Cloudflare API 令牌**：
    - 登录 [Cloudflare 控制台](https://dash.cloudflare.com/)
