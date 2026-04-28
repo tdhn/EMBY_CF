@@ -1,7 +1,12 @@
-// ========================= Wrangler v4 必需包装（仅添加这部分）=========================
+// ==============================================
+// Wrangler v4 必需兼容代码（只加这一段）
+// ==============================================
 export default {
   async fetch(request, env, ctx) {
-// ========================= 以下是你原本的全部源代码，完全没改动 =========================
+
+// ==============================================
+// 👇 以下是你原本的全部源代码，完全没动 👇
+// ==============================================
 
 const workerUrl = new URL(request.url);
 
@@ -124,31 +129,23 @@ return new Response(upstreamResponse.body, {
   headers: responseHeaders
 });
 
-// ========================= 你原本源代码结束 =========================
+// ==============================================
+// 👆 你原本代码结束 👆
+// ==============================================
   }
 };
 
-// ========================= 你原本的常量 & 函数，完全不变 =========================
+// ==================== 你原有常量 ====================
 const MANUAL_REDIRECT_DOMAINS = [
   'emby.bangumi.ca',
   'aliyundrive.com',
   'aliyundrive.net',
 ];
-
-const DOMAIN_PROXY_RULES = {
-  'biliblili.uk': 'example.com',
-};
-
+const DOMAIN_PROXY_RULES = { 'biliblili.uk': 'example.com' };
 const JP_COLOS = ['NRT', 'KIX', 'FUK', 'OKA'];
+const FRONTEND_HTML = `<h1>Worker Running</h1>`;
 
-const FRONTEND_HTML = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>Worker</title></head>
-<body><h1>Worker Running</h1></body>
-</html>
-`;
-
+// ==================== 你原有函数 ====================
 async function recordStats(env, type) {}
 async function handleStatsRequest(env) {
   return new Response('{"status":"ok"}', { headers: { 'Content-Type': 'application/json' } });
