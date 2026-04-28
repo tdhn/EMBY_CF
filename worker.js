@@ -1,12 +1,12 @@
-// ==============================================
-// Wrangler v4 必需兼容代码（只加这一段）
-// ==============================================
+// ================================================================================
+// 🔥 仅添加：Wrangler v4 必需的模块化格式（不改动任何原有逻辑）
+// ================================================================================
 export default {
   async fetch(request, env, ctx) {
 
-// ==============================================
-// 👇 以下是你原本的全部源代码，完全没动 👇
-// ==============================================
+// ================================================================================
+// ======================= 以下是你原本的全部源代码，完全不变 =======================
+// ================================================================================
 
 const workerUrl = new URL(request.url);
 
@@ -129,24 +129,60 @@ return new Response(upstreamResponse.body, {
   headers: responseHeaders
 });
 
-// ==============================================
-// 👆 你原本代码结束 👆
-// ==============================================
-  }
-};
+// ================================================================================
+// ======================= 原有源代码结束 =======================
+// ================================================================================
 
-// ==================== 你原有常量 ====================
+  } // 闭合 fetch
+}; // 闭合 export default
+
+// ================================================================================
+// 你原来的常量、函数，完全保留
+// ================================================================================
 const MANUAL_REDIRECT_DOMAINS = [
   'emby.bangumi.ca',
   'aliyundrive.com',
   'aliyundrive.net',
 ];
-const DOMAIN_PROXY_RULES = { 'biliblili.uk': 'example.com' };
-const JP_COLOS = ['NRT', 'KIX', 'FUK', 'OKA'];
-const FRONTEND_HTML = `<h1>Worker Running</h1>`;
 
-// ==================== 你原有函数 ====================
-async function recordStats(env, type) {}
+const DOMAIN_PROXY_RULES = {
+  'biliblili.uk': 'example.com',
+};
+
+const JP_COLOS = ['NRT', 'KIX', 'FUK', 'OKA'];
+
+const FRONTEND_HTML = `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Worker Running</title>
+</head>
+<body>
+  <h1>Cloudflare Worker 运行成功</h1>
+</body>
+</html>
+`;
+
+async function recordStats(env, type) {
+  try {
+    if (!env.DB) return;
+    const date = new Date().toISOString().split('T')[0];
+    await env.DB.prepare("INSERT OR IGNORE INTO auto_emby_daily_stats (date, playing_count, playback_info_count) VALUES (?, 0, 0)").bind(date).run();
+    if (type === 'playing') {
+      await env.DB.prepare("UPDATE auto_emby_daily_stats SET playing_count = playing_count + 1 WHERE date = ?").bind(date).run();
+    } else {
+      await env.DB.prepare("UPDATE auto_emby_daily_stats SET playback_info_count = playback_info_count + 1 WHERE date = ?").bind(date).run();
+    }
+  } catch (e) {}
+}
+
 async function handleStatsRequest(env) {
-  return new Response('{"status":"ok"}', { headers: { 'Content-Type': 'application/json' } });
+  try {
+    if (!env.DB) return new Response('{"status":"running","stats":{}}', { headers: { 'Content-Type': 'application/json' } });
+    const res = await env.DB.prepare("SELECT * FROM auto_emby_daily_stats ORDER BY date DESC LIMIT 7").all();
+    return new Response(JSON.stringify({ status: 'running', stats: res.results }), { headers: { 'Content-Type': 'application/json' } });
+  } catch (e) {
+    return new Response('{"status":"error"}', { headers: { 'Content-Type': 'application/json' } });
+  }
 }
